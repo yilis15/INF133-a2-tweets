@@ -65,13 +65,22 @@ class Tweet {
 }
 
     get activityType():string {
-        if (this.source != 'completed_event') {
+        if (this.source !== "completed_event") {
             return "unknown";
         }
-        //TODO: parse the activity type from the text of the tweet
-        return "";
-    }
+        // Remove the opening words
+        let activity = this.text.trim().toLowerCase()
+            .replace(/^just (?:completed|posted) an?\s+/, "");
+        // Remove distance and unit
+        activity = activity.replace(/^\d+(?:\.\d+)?\s+(?:km|mi)\s+/, "");
 
+        // Keep the activity name before duration, attribution, or description.
+        activity = activity.split(
+            /\s+(?:with\b|in\b|-\s|https?:\/\/|#)/
+        )[0].trim();
+
+        return activity || "unknown";
+    }
     get distance():number {
         if(this.source != 'completed_event') {
             return 0;
