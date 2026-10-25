@@ -81,12 +81,26 @@ class Tweet {
 
         return activity || "unknown";
     }
+
     get distance():number {
-        if(this.source != 'completed_event') {
+        if (this.source !== "completed_event") {
             return 0;
         }
-        //TODO: prase the distance from the text of the tweet
-        return 0;
+
+        // Read the distance
+        const match = this.text.trim().match(
+            /^just (?:completed|posted) an?\s+(\d+(?:\.\d+)?)\s+(km|mi)\b/i
+        );
+        if (match === null) {
+            return 0;
+        }
+
+        const value = Number(match[1]);
+        const unit = match[2].toLowerCase();
+        if (unit === "km") {
+            return value / 1.609;
+        }
+        return value;
     }
 
     getHTMLTableRow(rowNumber:number):string {
