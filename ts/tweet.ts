@@ -38,16 +38,31 @@ class Tweet {
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written():boolean {
         //TODO: identify whether the tweet is written
-        return false;
+        return this.writtenText.length > 0;
     }
 
     get writtenText():string {
-        if(!this.written) {
-            return "";
-        }
-        //TODO: parse the written text from the tweet
+    if (this.source !== "completed_event") {
         return "";
     }
+    const cleanedText = this.text
+        .replace(/https?:\/\/\S+/gi, "")
+        .replace(/#Runkeeper\b/gi, "")
+        .trim();
+
+    const separatorIndex = cleanedText.indexOf(" - ");
+
+    if (separatorIndex === -1) {
+        return "";
+    }
+    const description = cleanedText
+        .slice(separatorIndex + 3)
+        .trim();
+    if (description.toLowerCase() === "tomtom mysports watch") {
+        return "";
+    }
+    return description;    
+}
 
     get activityType():string {
         if (this.source != 'completed_event') {
