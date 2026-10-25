@@ -86,7 +86,6 @@ class Tweet {
         if (this.source !== "completed_event") {
             return 0;
         }
-
         // Read the distance
         const match = this.text.trim().match(
             /^just (?:completed|posted) an?\s+(\d+(?:\.\d+)?)\s+(km|mi)\b/i
@@ -94,7 +93,6 @@ class Tweet {
         if (match === null) {
             return 0;
         }
-
         const value = Number(match[1]);
         const unit = match[2].toLowerCase();
         if (unit === "km") {
