@@ -78,6 +78,26 @@ function parseTweets(runkeeper_tweets) {
 			element.textContent = percentage + '%';
 		});
 	}
+	// Count completed activity tweets that contain written descriptions.
+	const completedTweets = tweet_array.filter(function(tweet) {
+		return tweet.source === 'completed_event';
+	});
+
+	const writtenTweets = completedTweets.filter(function(tweet) {
+		return tweet.written;
+	});
+
+	const writtenPercentage = completedTweets.length === 0
+		? '0.00'
+		: (writtenTweets.length / completedTweets.length * 100).toFixed(2);
+
+	document.querySelectorAll('.written').forEach(function(element) {
+		element.textContent = writtenTweets.length;
+	});
+
+	document.querySelectorAll('.writtenPct').forEach(function(element) {
+		element.textContent = writtenPercentage + '%';
+	});
 }
 
 //Wait for the DOM to load
