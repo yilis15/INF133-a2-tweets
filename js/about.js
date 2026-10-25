@@ -44,6 +44,40 @@ function parseTweets(runkeeper_tweets) {
 	document.getElementById('lastDate').textContent =
 		latest.toLocaleDateString('en-US', dateOptions);
 
+	// Count tweets in each category.
+	const categoryCounts = {
+		completed_event: 0,
+		live_event: 0,
+		achievement: 0,
+		miscellaneous: 0
+	};
+
+	for (const tweet of tweet_array) {
+		categoryCounts[tweet.source]++;
+	}
+
+	// Match each category to its HTML class.
+	const categoryClasses = {
+		completed_event: 'completedEvents',
+		live_event: 'liveEvents',
+		achievement: 'achievements',
+		miscellaneous: 'miscellaneous'
+	};
+
+	// Display counts and percentages.
+	for (const category of Object.keys(categoryCounts)) {
+		const count = categoryCounts[category];
+		const className = categoryClasses[category];
+		const percentage = (count / tweet_array.length * 100).toFixed(2);
+
+		document.querySelectorAll('.' + className).forEach(function(element) {
+			element.textContent = count;
+		});
+
+		document.querySelectorAll('.' + className + 'Pct').forEach(function(element) {
+			element.textContent = percentage + '%';
+		});
+	}
 }
 
 //Wait for the DOM to load
