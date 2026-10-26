@@ -79,6 +79,101 @@ function parseTweets(runkeeper_tweets) {
 
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
+	const topThreeTypes = activityData.slice(0, 3).map(function(activity) {
+		return activity.activityType;
+	});
+
+	const weekdays = [
+		'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+		'Thursday', 'Friday', 'Saturday'
+	];
+
+	// Create one chart record per activity with a distance.
+	const distanceData = [];
+
+	for (const tweet of tweet_array) {
+		if (tweet.source !== 'completed_event') {
+			continue;
+		}
+
+		const type = tweet.activityType;
+		const distance = tweet.distance;
+
+		if (
+			!topThreeTypes.includes(type) ||
+			!Number.isFinite(distance) ||
+			distance <= 0 ||
+			Number.isNaN(tweet.time.getTime())
+		) {
+			continue;
+		}
+
+		distanceData.push({
+			activityType: type,
+			distance: distance,
+			day: weekdays[tweet.time.getUTCDay()]
+		});
+	}
+
+	// Plot individual activity distances.
+	const distance_vis_spec = {
+		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+		"description": "Individual activity distances by day of the week.",
+		"width": 500,
+		"height": 300,
+		"data": {
+			"values": distanceData
+		},
+		"mark": {
+			"type": "circle",
+			"opacity": 0.3,
+			"size": 35
+		},
+		"encoding": {
+			"x": {
+				"field": "day",
+				"type": "ordinal",
+				"sort": weekdays,
+				"title": "Day of the week"
+			},
+			"y": {
+				"field": "distance",
+				"type": "quantitative",
+				"title": "Distance (miles)",
+				"scale": {
+					"zero": true
+				}
+			},
+			"color": {
+				"field": "activityType",
+				"type": "nominal",
+				"title": "Activity type",
+				"scale": {
+					"domain": topThreeTypes
+				}
+			},
+			"tooltip": [
+				{
+					"field": "activityType",
+					"type": "nominal",
+					"title": "Activity"
+				},
+				{
+					"field": "day",
+					"type": "ordinal",
+					"title": "Day"
+				},
+				{
+					"field": "distance",
+					"type": "quantitative",
+					"title": "Distance (miles)",
+					"format": ".2f"
+				}
+			]
+		}
+	};
+
+	vegaEmbed('#distanceVis', distance_vis_spec, {actions: false});
 }
 
 //Wait for the DOM to load
