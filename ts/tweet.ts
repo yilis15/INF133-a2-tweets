@@ -103,6 +103,39 @@ class Tweet {
 
     getHTMLTableRow(rowNumber:number):string {
         //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-        return "<tr></tr>";
+    const row = document.createElement("tr");
+
+    // First column: result number.
+    const numberCell = document.createElement("th");
+    numberCell.scope = "row";
+    numberCell.textContent = String(rowNumber);
+    row.appendChild(numberCell);
+
+    // Second column: activity type.
+    const activityCell = document.createElement("td");
+    activityCell.textContent = this.activityType;
+    row.appendChild(activityCell);
+
+    // Third column: full tweet, with clickable links.
+    const tweetCell = document.createElement("td");
+    const parts = this.text.split(/(https?:\/\/\S+)/gi);
+
+    for (const part of parts) {
+        if (/^https?:\/\//i.test(part)) {
+            const link = document.createElement("a");
+            link.href = part;
+            link.textContent = part;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            tweetCell.appendChild(link);
+        } else {
+            tweetCell.appendChild(document.createTextNode(part));
+        }
+    }
+
+    row.appendChild(tweetCell);
+
+    return row.outerHTML;
     }
 }
