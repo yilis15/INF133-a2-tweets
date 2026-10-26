@@ -62,13 +62,14 @@ function parseTweets(runkeeper_tweets) {
 	  },
 	  "mark": "bar",
 	  "encoding": {
-	    "x": {
-	      "field": "activityType",
-	      "type": "nominal",
-	      "axis": {
-	        "labelAngle": 45
-	      }
-	    },
+		"x": {
+			"field": "activityType",
+			"type": "nominal",
+			"sort": activityData.map(function(activity) {
+				return activity.activityType;
+			}),
+			"title": "Activity type"
+		},
 	    "y": {
 	      "field": "count",
 	      "type": "quantitative"
