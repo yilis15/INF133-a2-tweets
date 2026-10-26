@@ -248,29 +248,28 @@ function parseTweets(runkeeper_tweets) {
 		mean_distance_vis_spec,
 		{actions: false}
 	);
-}
+	const rawChart = document.getElementById('distanceVis');
+    const meanChart = document.getElementById('distanceVisAggregated');
+    const aggregateButton = document.getElementById('aggregate');
 
-// Initially show individual distances and hide the means.
-const rawChart = document.getElementById('distanceVis');
-const meanChart = document.getElementById('distanceVisAggregated');
-const aggregateButton = document.getElementById('aggregate');
+    let showingMeans = false;
 
-let showingMeans = false;
+    function updateChartVisibility() {
+        rawChart.style.display = showingMeans ? 'none' : 'block';
+        meanChart.style.display = showingMeans ? 'block' : 'none';
 
-function updateChartVisibility() {
-    rawChart.style.display = showingMeans ? 'none' : 'block';
-    meanChart.style.display = showingMeans ? 'block' : 'none';
+        aggregateButton.textContent =
+            showingMeans ? 'Show all activities' : 'Show means';
+    }
 
-    aggregateButton.textContent =
-        showingMeans ? 'Show all activities' : 'Show means';
-}
-
-updateChartVisibility();
-
-aggregateButton.addEventListener('click', function() {
-    showingMeans = !showingMeans;
     updateChartVisibility();
-});
+
+    aggregateButton.addEventListener('click', function() {
+        showingMeans = !showingMeans;
+        updateChartVisibility();
+    });
+}
+
 
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
