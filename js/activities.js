@@ -115,6 +115,76 @@ function parseTweets(runkeeper_tweets) {
 		});
 	}
 
+	// Calculate mean distance for each activities.
+	const activityMeans = topThreeTypes.map(function(type) {
+		const records = distanceData.filter(function(record) {
+			return record.activityType === type;
+		});
+
+		const total = records.reduce(function(sum, record) {
+			return sum + record.distance;
+		}, 0);
+
+		return {
+			activityType: type,
+			count: records.length,
+			meanDistance: records.length > 0 ? total / records.length : 0
+		};
+	}).filter(function(activity) {
+		return activity.count > 0;
+	});
+
+	activityMeans.sort(function(a, b) {
+		return b.meanDistance - a.meanDistance;
+	});
+
+	if (activityMeans.length > 0) {
+		document.getElementById('longestActivityType').textContent =
+			activityMeans[0].activityType;
+
+		document.getElementById('shortestActivityType').textContent =
+			activityMeans[activityMeans.length - 1].activityType;
+	}
+
+	// Compare mean distance per activity record on weekdays and weekends.
+	const weekendRecords = distanceData.filter(function(record) {
+		return record.day === 'Saturday' || record.day === 'Sunday';
+	});
+
+	const weekdayRecords = distanceData.filter(function(record) {
+		return record.day !== 'Saturday' && record.day !== 'Sunday';
+	});
+
+	function meanDistance(records) {
+		const total = records.reduce(function(sum, record) {
+			return sum + record.distance;
+		}, 0);
+
+		return records.length > 0 ? total / records.length : null;
+	}
+
+	const weekendMean = meanDistance(weekendRecords);
+	const weekdayMean = meanDistance(weekdayRecords);
+
+	let longerPeriod = 'N/A';
+
+	if (weekendMean !== null && weekdayMean !== null) {
+		if (weekendMean > weekdayMean) {
+			longerPeriod = 'weekends';
+		} else if (weekdayMean > weekendMean) {
+			longerPeriod = 'weekdays';
+		} else {
+			longerPeriod = 'weekdays and weekends equally';
+		}
+	}
+
+	document.getElementById('weekdayOrWeekendLonger').textContent =
+		longerPeriod;
+
+	// Show the calculations for verification.
+	console.table(activityMeans);
+	console.log('Weekend mean distance:', weekendMean);
+	console.log('Weekday mean distance:', weekdayMean);
 	// Plot individual activity distances.
 	const distance_vis_spec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
