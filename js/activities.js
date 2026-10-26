@@ -174,6 +174,80 @@ function parseTweets(runkeeper_tweets) {
 	};
 
 	vegaEmbed('#distanceVis', distance_vis_spec, {actions: false});
+	// Calculate mean distance for each activity type on each weekday.
+	const mean_distance_vis_spec = {
+		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+		"description": "Mean activity distance by day of the week.",
+		"width": 500,
+		"height": 300,
+		"data": {
+			"values": distanceData
+		},
+		"transform": [
+			{
+				"aggregate": [
+					{
+						"op": "mean",
+						"field": "distance",
+						"as": "meanDistance"
+					}
+				],
+				"groupby": ["day", "activityType"]
+			}
+		],
+		"mark": {
+			"type": "circle",
+			"size": 100
+		},
+		"encoding": {
+			"x": {
+				"field": "day",
+				"type": "ordinal",
+				"sort": weekdays,
+				"title": "Day of the week"
+			},
+			"y": {
+				"field": "meanDistance",
+				"type": "quantitative",
+				"title": "Mean distance (miles)",
+				"scale": {
+					"zero": true
+				}
+			},
+			"color": {
+				"field": "activityType",
+				"type": "nominal",
+				"title": "Activity type",
+				"scale": {
+					"domain": topThreeTypes
+				}
+			},
+			"tooltip": [
+				{
+					"field": "activityType",
+					"type": "nominal",
+					"title": "Activity"
+				},
+				{
+					"field": "day",
+					"type": "ordinal",
+					"title": "Day"
+				},
+				{
+					"field": "meanDistance",
+					"type": "quantitative",
+					"title": "Mean distance (miles)",
+					"format": ".2f"
+				}
+			]
+		}
+	};
+
+	vegaEmbed(
+		'#distanceVisAggregated',
+		mean_distance_vis_spec,
+		{actions: false}
+	);
 }
 
 //Wait for the DOM to load
