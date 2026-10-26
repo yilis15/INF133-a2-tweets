@@ -42,27 +42,46 @@ class Tweet {
     }
 
     get writtenText():string {
-    if (this.source !== "completed_event") {
-        return "";
-    }
-    const cleanedText = this.text
-        .replace(/https?:\/\/\S+/gi, "")
-        .replace(/#Runkeeper\b/gi, "")
-        .trim();
+        if (this.source !== "completed_event") {
+            return "";
+        }
 
-    const separatorIndex = cleanedText.indexOf(" - ");
+        // Remove links and the standard Runkeeper hashtag.
+        const cleanedText = this.text
+            .replace(/https?:\/\/\S+/gi, "")
+            .replace(/#Runkeeper\b/gi, "")
+            .trim();
 
-    if (separatorIndex === -1) {
-        return "";
+        // Find a description following a spaced dash.
+        // Also allow an empty description or a different dash character.
+        const descriptionMatch = cleanedText.match(
+            /^just (?:completed|posted) an?\s+.+?\s+[-–—]\s*([\s\S]*)$/i
+        );
+
+        if (descriptionMatch !== null) {
+            const description = descriptionMatch[1].trim();
+
+            // Exclude the device-generated default description.
+            if (/^tomtom\s+mysports\s+watch[.!]?$/i.test(description)) {
+                return "";
+            }
+
+            return description;
+        }
+
+        // Check for extra content after the standard sharing message.
+        const remainingText = cleanedText.replace(
+            /^just (?:completed|posted) an?\s+.+?\s+with\s+@?runkeeper\.\s*check it out!\s*/i,
+            ""
+        );
+
+        // If no recognized template was removed, avoid guessing.
+        if (remainingText === cleanedText) {
+            return "";
+        }
+
+        return remainingText.trim();
     }
-    const description = cleanedText
-        .slice(separatorIndex + 3)
-        .trim();
-    if (description.toLowerCase() === "tomtom mysports watch") {
-        return "";
-    }
-    return description;    
-}
 
     get activityType():string {
         if (this.source !== "completed_event") {
