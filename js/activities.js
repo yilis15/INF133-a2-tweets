@@ -250,6 +250,28 @@ function parseTweets(runkeeper_tweets) {
 	);
 }
 
+// Initially show individual distances and hide the means.
+const rawChart = document.getElementById('distanceVis');
+const meanChart = document.getElementById('distanceVisAggregated');
+const aggregateButton = document.getElementById('aggregate');
+
+let showingMeans = false;
+
+function updateChartVisibility() {
+    rawChart.style.display = showingMeans ? 'none' : 'block';
+    meanChart.style.display = showingMeans ? 'block' : 'none';
+
+    aggregateButton.textContent =
+        showingMeans ? 'Show all activities' : 'Show means';
+}
+
+updateChartVisibility();
+
+aggregateButton.addEventListener('click', function() {
+    showingMeans = !showingMeans;
+    updateChartVisibility();
+});
+
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
 	loadSavedRunkeeperTweets().then(parseTweets);
