@@ -190,8 +190,6 @@ function parseTweets(runkeeper_tweets) {
 	const distance_vis_spec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 		"description": "Individual activity distances by day of the week.",
-		"width": 500,
-		"height": 300,
 		"data": {
 			"values": distanceData
 		},
@@ -223,24 +221,6 @@ function parseTweets(runkeeper_tweets) {
 					"domain": topThreeTypes
 				}
 			},
-			"tooltip": [
-				{
-					"field": "activityType",
-					"type": "nominal",
-					"title": "Activity"
-				},
-				{
-					"field": "day",
-					"type": "ordinal",
-					"title": "Day"
-				},
-				{
-					"field": "distance",
-					"type": "quantitative",
-					"title": "Distance (miles)",
-					"format": ".2f"
-				}
-			]
 		}
 	};
 
@@ -249,8 +229,6 @@ function parseTweets(runkeeper_tweets) {
 	const mean_distance_vis_spec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 		"description": "Mean activity distance by day of the week.",
-		"width": 500,
-		"height": 300,
 		"data": {
 			"values": distanceData
 		},
@@ -293,24 +271,6 @@ function parseTweets(runkeeper_tweets) {
 					"domain": topThreeTypes
 				}
 			},
-			"tooltip": [
-				{
-					"field": "activityType",
-					"type": "nominal",
-					"title": "Activity"
-				},
-				{
-					"field": "day",
-					"type": "ordinal",
-					"title": "Day"
-				},
-				{
-					"field": "meanDistance",
-					"type": "quantitative",
-					"title": "Mean distance (miles)",
-					"format": ".2f"
-				}
-			]
 		}
 	};
 
