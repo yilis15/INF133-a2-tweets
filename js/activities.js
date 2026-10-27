@@ -112,7 +112,8 @@ function parseTweets(runkeeper_tweets) {
 		distanceData.push({
 			activityType: type,
 			distance: distance,
-			day: weekdays[tweet.time.getUTCDay()]
+			time: tweet.time.toISOString(),
+			day: weekdays[tweet.time.getDay()]
 		});
 	}
 
@@ -187,120 +188,135 @@ function parseTweets(runkeeper_tweets) {
 	console.log('Weekend mean distance:', weekendMean);
 	console.log('Weekday mean distance:', weekdayMean);
 	// Plot individual activity distances.
+	// 1: Every tweet's distance by day.
 	const distance_vis_spec = {
 		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-		"description": "Individual activity distances by day of the week.",
+		"description": "Distances of the three most tweeted-about activities by day of the week.",
 		"data": {
 			"values": distanceData
 		},
-		"mark": {
-			"type": "circle",
-			"opacity": 0.3,
-			"size": 35
-		},
+		"mark": "point",
 		"encoding": {
 			"x": {
-				"field": "day",
+				"field": "time",
+				"timeUnit": "day",
 				"type": "ordinal",
-				"sort": weekdays,
-				"title": "Day of the week"
+				"title": "time (day)"
 			},
 			"y": {
 				"field": "distance",
 				"type": "quantitative",
-				"title": "Distance (miles)",
-				"scale": {
-					"zero": true
-				}
+				"title": "distance (miles)"
 			},
 			"color": {
 				"field": "activityType",
 				"type": "nominal",
-				"title": "Activity type",
+				"title": "activityType",
 				"scale": {
 					"domain": topThreeTypes
 				}
 			},
+						"tooltip": [
+				{
+					"field": "activityType",
+					"type": "nominal",
+					"title": "Activity"
+				},
+				{
+					"field": "day",
+					"type": "ordinal",
+					"title": "Day"
+				},
+				{
+					"field": "distance",
+					"type": "quantitative",
+					"title": "Distance (miles)",
+					"format": ".2f"
+				}
+			]
+		}
+	};
+
+	// 2: Mean distance for each activity on each day.
+	const distance_vis_aggregated_spec = {
+		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+		"description": "Mean distances of the three most tweeted-about activities by day of the week.",
+		"data": {
+			"values": distanceData
+		},
+		"mark": "point",
+		"encoding": {
+			"x": {
+				"field": "time",
+				"timeUnit": "day",
+				"type": "ordinal",
+				"title": "time (day)"
+			},
+			"y": {
+				"field": "distance",
+				"aggregate": "mean",
+				"type": "quantitative",
+				"title": "Mean of distance (miles)"
+			},
+			"color": {
+				"field": "activityType",
+				"type": "nominal",
+				"title": "activityType",
+				"scale": {
+					"domain": topThreeTypes
+				}
+			},
+			"tooltip": [
+				{
+					"field": "activityType",
+					"type": "nominal",
+					"title": "Activity"
+				},
+				{
+					"field": "day",
+					"type": "ordinal",
+					"title": "Day"
+				},
+				{
+					"field": "distance",
+					"type": "quantitative",
+					"title": "Mean Distance (miles)",
+					"format": ".2f"
+				}
+			]
 		}
 	};
 
 	vegaEmbed('#distanceVis', distance_vis_spec, {actions: false});
-	// Calculate mean distance for each activity type on each weekday.
-	const mean_distance_vis_spec = {
-		"$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-		"description": "Mean activity distance by day of the week.",
-		"data": {
-			"values": distanceData
-		},
-		"transform": [
-			{
-				"aggregate": [
-					{
-						"op": "mean",
-						"field": "distance",
-						"as": "meanDistance"
-					}
-				],
-				"groupby": ["day", "activityType"]
-			}
-		],
-		"mark": {
-			"type": "circle",
-			"size": 100
-		},
-		"encoding": {
-			"x": {
-				"field": "day",
-				"type": "ordinal",
-				"sort": weekdays,
-				"title": "Day of the week"
-			},
-			"y": {
-				"field": "meanDistance",
-				"type": "quantitative",
-				"title": "Mean distance (miles)",
-				"scale": {
-					"zero": true
-				}
-			},
-			"color": {
-				"field": "activityType",
-				"type": "nominal",
-				"title": "Activity type",
-				"scale": {
-					"domain": topThreeTypes
-				}
-			},
-		}
-	};
-
 	vegaEmbed(
 		'#distanceVisAggregated',
-		mean_distance_vis_spec,
+		distance_vis_aggregated_spec,
 		{actions: false}
 	);
-	const rawChart = document.getElementById('distanceVis');
-    const meanChart = document.getElementById('distanceVisAggregated');
-    const aggregateButton = document.getElementById('aggregate');
 
-    let showingMeans = false;
+	// Show the first graph and hide the mean graph.
+	const distanceVis = document.getElementById('distanceVis');
+	const distanceVisAggregated =
+		document.getElementById('distanceVisAggregated');
+	const button = document.getElementById('aggregate');
 
-    function updateChartVisibility() {
-        rawChart.style.display = showingMeans ? 'none' : 'block';
-        meanChart.style.display = showingMeans ? 'block' : 'none';
+	distanceVis.style.display = "block";
+	distanceVisAggregated.style.display = "none";
+	button.innerText = "Show means";
 
-        aggregateButton.textContent =
-            showingMeans ? 'Show all activities' : 'Show means';
-    }
-
-    updateChartVisibility();
-
-    aggregateButton.addEventListener('click', function() {
-        showingMeans = !showingMeans;
-        updateChartVisibility();
-    });
+	// Switch graphs when the button is clicked.
+	button.addEventListener('click', function() {
+		if (distanceVisAggregated.style.display === "none") {
+			distanceVis.style.display = "none";
+			distanceVisAggregated.style.display = "block";
+			button.innerText = "Show all activities";
+		} else {
+			distanceVis.style.display = "block";
+			distanceVisAggregated.style.display = "none";
+			button.innerText = "Show means";
+		}
+	});
 }
-
 
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
